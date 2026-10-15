@@ -1,6 +1,7 @@
 package jp.co.sss.lms.service;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +29,7 @@ import jp.co.sss.lms.util.TrainingTime;
  * 
  * @author 東京ITスクール
  */
+
 @Service
 public class StudentAttendanceService {
 
@@ -209,6 +211,8 @@ public class StudentAttendanceService {
 	 * 
 	 * @param attendanceManagementDtoList
 	 * @return 勤怠編集フォーム
+	 * 
+	 * @author task26 編集：大橋
 	 */
 	public AttendanceForm setAttendanceForm(
 			List<AttendanceManagementDto> attendanceManagementDtoList) {
@@ -333,5 +337,20 @@ public class StudentAttendanceService {
 		// 完了メッセージ
 		return messageUtil.getMessage(Constants.PROP_KEY_ATTENDANCE_UPDATE_NOTICE);
 	}
-
+	/**
+	 * @author 大橋
+	 * 
+	 */
+	public boolean notEnterCheck() throws ParseException {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+		Date now = new Date();
+		String today = sdf.format(now);
+		now = sdf.parse(today);
+		Integer emptyCount = tStudentAttendanceMapper.notEnterCount(loginUserDto.getLmsUserId(), (short)0, now);
+		if(emptyCount > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 }
