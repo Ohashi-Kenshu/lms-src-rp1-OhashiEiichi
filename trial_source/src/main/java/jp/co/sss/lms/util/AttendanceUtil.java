@@ -78,6 +78,8 @@ public class AttendanceUtil {
 	 *
 	 * @param min 中抜け時間
 	 * @return 時(hour)と分(minute)に変換したクラス
+	 * 分数で計上された中抜け時間を〇時間〇分に変換している？
+	 * 60分で割れる数と余り
 	 */
 	public TrainingTime calcBlankTime(int min) {
 		int hour = min / 60;
@@ -147,4 +149,41 @@ public class AttendanceUtil {
 		return false;
 	}
 
+	/**
+	 * task26 時間/分マップ取得用
+	 */
+	public LinkedHashMap<Integer, String> prepareHourAndMin(String hORm) {
+		LinkedHashMap<Integer, String> map = new LinkedHashMap<>();
+		map.put(null, null);
+		if ("h".equals(hORm)) {
+			for (int i = 0; i < 24; i++) {
+				if ( i<10 ) {
+					map.put(i, "0" + i);
+				} else {
+					map.put(i, Integer.toString(i));
+				}
+			}
+			return map;
+		} else if ("m".equals(hORm)) {
+			for (int i = 0; i < 60; i++) {
+				if ( i<10 ) {
+					map.put(i, "0" + i);
+				} else {
+					map.put(i, Integer.toString(i));
+				}
+			}
+		}
+			return map;
+	}
+	public Integer getHourAndMinOfTrainingTime(String hORm, String trainingTimeStamp) {
+		Integer result = null;
+		if (trainingTimeStamp != null && !trainingTimeStamp.isBlank()) {
+		if("h".equals(hORm)) {
+			result = Integer.parseInt(trainingTimeStamp.substring(0,2));
+		} else if("m".equals(hORm)) {
+			result = Integer.parseInt(trainingTimeStamp.substring(3,5));
+		}
+	  }
+		return result;
+	}
 }

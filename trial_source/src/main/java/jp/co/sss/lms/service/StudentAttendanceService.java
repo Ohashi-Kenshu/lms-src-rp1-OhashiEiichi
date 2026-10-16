@@ -217,14 +217,17 @@ public class StudentAttendanceService {
 	public AttendanceForm setAttendanceForm(
 			List<AttendanceManagementDto> attendanceManagementDtoList) {
 
+		/**
+		 * task26 選択肢用の中抜け時間・時間・分を設定
+		 */
 		AttendanceForm attendanceForm = new AttendanceForm();
 		attendanceForm.setAttendanceList(new ArrayList<DailyAttendanceForm>());
 		attendanceForm.setLmsUserId(loginUserDto.getLmsUserId());
 		attendanceForm.setUserName(loginUserDto.getUserName());
 		attendanceForm.setLeaveFlg(loginUserDto.getLeaveFlg());
 		attendanceForm.setBlankTimes(attendanceUtil.setBlankTime());
-
-		// 途中退校している場合のみ設定
+		attendanceForm.setHourTimes(attendanceUtil.prepareHourAndMin("h"));
+		attendanceForm.setMinTimes(attendanceUtil.prepareHourAndMin("m")); // 途中退校している場合のみ設定
 		if (loginUserDto.getLeaveDate() != null) {
 			attendanceForm
 					.setLeaveDate(dateUtil.dateToString(loginUserDto.getLeaveDate(), "yyyy-MM-dd"));
@@ -242,6 +245,18 @@ public class StudentAttendanceService {
 			dailyAttendanceForm
 					.setTrainingStartTime(attendanceManagementDto.getTrainingStartTime());
 			dailyAttendanceForm.setTrainingEndTime(attendanceManagementDto.getTrainingEndTime());
+			/**task26 出退勤の各時間/分を抜き出し 
+			 * 出勤
+			 */
+			dailyAttendanceForm.setHourOfTrainingStartTime(
+					attendanceUtil.getHourAndMinOfTrainingTime("h", dailyAttendanceForm.getTrainingStartTime()));
+			dailyAttendanceForm.setMinuteOfTrainingStartTime(
+					attendanceUtil.getHourAndMinOfTrainingTime("m", dailyAttendanceForm.getTrainingStartTime()));
+			/**退勤 */
+			dailyAttendanceForm.setHourOfTrainingEndTime(
+					attendanceUtil.getHourAndMinOfTrainingTime("h", dailyAttendanceForm.getTrainingEndTime()));
+			dailyAttendanceForm.setMinuteOfTrainingEndTime(
+					attendanceUtil.getHourAndMinOfTrainingTime("m", dailyAttendanceForm.getTrainingEndTime()));
 			if (attendanceManagementDto.getBlankTime() != null) {
 				dailyAttendanceForm.setBlankTime(attendanceManagementDto.getBlankTime());
 				dailyAttendanceForm.setBlankTimeValue(String.valueOf(
@@ -337,6 +352,7 @@ public class StudentAttendanceService {
 		// 完了メッセージ
 		return messageUtil.getMessage(Constants.PROP_KEY_ATTENDANCE_UPDATE_NOTICE);
 	}
+
 	/**
 	 * @author 大橋
 	 * 
@@ -346,11 +362,25 @@ public class StudentAttendanceService {
 		Date now = new Date();
 		String today = sdf.format(now);
 		now = sdf.parse(today);
-		Integer emptyCount = tStudentAttendanceMapper.notEnterCount(loginUserDto.getLmsUserId(), (short)0, now);
-		if(emptyCount > 0) {
+		Integer emptyCount = tStudentAttendanceMapper.notEnterCount(loginUserDto.getLmsUserId(), (short) 0, now);
+		if (emptyCount > 0) {
 			return true;
 		} else {
 			return false;
 		}
+	}
+
+	public void formatConversion(AttendanceForm attendanceForm) {
+		for (DailyAttendanceForm da : attendanceForm.getAttendanceList()) {
+			if (da.getHourOfTrainingStartTime() != null && da.getMinuteOfTrainingStartTime() != null) {
+				da.setTrainingStartTime(
+						String.format("%02d:%02d", da.getHourOfTrainingStartTime(), da.getMinuteOfTrainingStartTime()));
+			}
+			if (da.getHourOfTrainingEndTime() != null && da.getMinuteOfTrainingEndTime() != null) {
+				da.setTrainingEndTime(
+						String.format("%02d:%02d", da.getHourOfTrainingEndTime(), da.getMinuteOfTrainingEndTime()));
+			}
+		}
+
 	}
 }
