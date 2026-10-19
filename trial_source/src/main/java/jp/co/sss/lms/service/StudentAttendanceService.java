@@ -9,6 +9,7 @@ import java.util.List;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 
 import jp.co.sss.lms.dto.AttendanceManagementDto;
 import jp.co.sss.lms.dto.LoginUserDto;
@@ -227,7 +228,8 @@ public class StudentAttendanceService {
 		attendanceForm.setLeaveFlg(loginUserDto.getLeaveFlg());
 		attendanceForm.setBlankTimes(attendanceUtil.setBlankTime());
 		attendanceForm.setHourTimes(attendanceUtil.prepareHourAndMin("h"));
-		attendanceForm.setMinTimes(attendanceUtil.prepareHourAndMin("m")); // 途中退校している場合のみ設定
+		attendanceForm.setMinTimes(attendanceUtil.prepareHourAndMin("m"));
+		// 途中退校している場合のみ設定
 		if (loginUserDto.getLeaveDate() != null) {
 			attendanceForm
 					.setLeaveDate(dateUtil.dateToString(loginUserDto.getLeaveDate(), "yyyy-MM-dd"));
@@ -382,5 +384,60 @@ public class StudentAttendanceService {
 			}
 		}
 
+	}
+
+	public void updateInputCheck(AttendanceForm attendanceForm, BindingResult result) throws ParseException {
+		for (DailyAttendanceForm da : attendanceForm.getAttendanceList()) {
+			int i = 0;
+			i++;
+			System.out.println(da.getNote().length());
+			if (da.getNote().length() > 100) {
+				result.rejectValue("attendanceList[" + i + "].note", "maxlength", new Object[] { "備考", 100 }, null);
+			}
+			if ((da.getHourOfTrainingStartTime() != null && da.getMinuteOfTrainingStartTime() == null)
+					|| (da.getHourOfTrainingStartTime() == null && da.getMinuteOfTrainingStartTime() != null)) {
+				if (da.getHourOfTrainingStartTime() != null) {
+					result.rejectValue("attendanceList[" + i + "].MinuteOfTrainingStartTime", "input.invalid",
+							new Object[] { "出勤時間" }, null);
+				}
+				if (da.getMinuteOfTrainingStartTime() != null) {
+					result.rejectValue("attendanceList[" + i + "].HourOfTrainingStartTime", "input.invalid",
+							new Object[] { "出勤時間" }, null);
+				}
+				if ((da.getHourOfTrainingEndTime() != null && da.getMinuteOfTrainingEndTime() == null)
+						|| (da.getHourOfTrainingEndTime() == null && da.getMinuteOfTrainingEndTime() != null)) {
+					if (da.getHourOfTrainingStartTime() != null) {
+						result.rejectValue("attendanceList[" + i + "].MinuteOfTrainingEndTime", "input.invalid",
+								new Object[] { "退勤時間" }, null);
+					}
+					if (da.getMinuteOfTrainingStartTime() != null) {
+						result.rejectValue("attendanceList[" + i + "].HourOfTrainingEndTime", "input.invalid",
+								new Object[] { "退勤時間" }, null);
+					}
+				}
+				if (da.getTrainingStartTime() == null && da.getTrainingEndTime() != null) {
+					result.rejectValue("attendanceList[" + i + "].TrainingStartTime",
+							"attendance.punchInEmptyinput.invalid",
+							new Object[] { "退勤時間" }, null);
+				}
+				if (da.getTrainingStartTime() != null && da.getTrainingEndTime() != null) {
+					SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
+					Date start = sdf.parse(da.getTrainingStartTime());
+					Date end = sdf.parse(da.getTrainingEndTime());
+					if (start.after(end)) {
+						result.rejectValue("attendanceList[" + i + "].TrainingEndTime",
+								"input.invalidattendance.trainingTimeRange",
+								new Object[] { i }, null);
+					}
+					Integer workTime = ((da.getHourOfTrainingStartTime() * 60) + da.getMinuteOfTrainingStartTime())
+							- ((da.getHourOfTrainingEndTime() * 60) + da.getMinuteOfTrainingEndTime());
+					if (workTime < da.getBlankTime()) {
+						result.rejectValue("attendanceList[" + i + "].blankTime",
+								"input.invalidattendance.trainingTimeRange", new Object[] { i },
+								null);
+					}
+				}
+			}
+		}
 	}
 }
