@@ -1,15 +1,23 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
 	th:replace="~{common/change-pass-layout :: layout(~{::title},~{::body/content()})}">
+
 <head>
-<meta charset="UTF-8" />
-<title>パスワード変更 | LMS</title>
+	<meta charset="UTF-8" />
+	<title>パスワード変更 | LMS</title>
+	<style>
+		.error-input {
+			border-color: rgb(255, 0, 0);
+		}
+	</style>
 </head>
+
 <body>
 
 	<h2>パスワード変更</h2>
 
-	<form th:action="@{/password/changePassword/mailComplete}" method="post" class="form-horizontal" id="upd-form" th:object="${loginForm}">
+	<form th:action="@{/password/changePassword/mailComplete}" method="post" class="form-horizontal" id="upd-form"
+		th:object="${loginForm}">
 
 		<div class="well bs-component">
 			<span class="help-inline error" th:if="${updateFaild}">*&nbsp;[[${updateFaild}]]</span>
@@ -34,8 +42,8 @@
 				<div class="form-group">
 					<label for="passwordConfirm" class="col-lg-2 control-label">確認パスワード</label>
 					<div class="col-lg-10">
-						<input type="password" id="passwordConfirm" name="passwordConfirm"
-							th:value="*{passwordConfirm}" th:errorclass="errorInput" class="form-control" />
+						<input type="password" id="passwordConfirm" name="passwordConfirm" th:value="*{passwordConfirm}"
+							th:errorclass="errorInput" class="form-control" />
 						<ul style="padding-left: 0; list-style: none;">
 							<li><span th:errors="*{passwordConfirm}" class="help-inline error"></span></li>
 						</ul>
@@ -76,9 +84,9 @@
 	</form>
 
 	<script>
-		$(function() {
+		$(function () {
 			var btn = false;
-			$('#upd-form').submit(function() {
+			$('#upd-form').submit(function () {
 				if (btn) {
 					return btn;
 				} else {
@@ -86,7 +94,7 @@
 					return btn;
 				}
 			});
-			$('#upd-btn').click(function() {
+			$('#upd-btn').click(function () {
 				btn = true;
 				$('#upd-form').submit();
 			});
@@ -94,4 +102,5 @@
 	</script>
 
 </body>
+
 </html>
