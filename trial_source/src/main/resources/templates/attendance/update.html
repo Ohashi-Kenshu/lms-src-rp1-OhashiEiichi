@@ -26,7 +26,8 @@
 
 	<div class="row">
 		<div class="bs-component col-sm-12">
-			<form th:action="@{/attendance/update}" method="post" th:object="${attendanceForm}" onsubmit="return confirm('送信してよろしいですか？')">
+			<form th:action="@{/attendance/update}" method="post" th:object="${attendanceForm}"
+				onsubmit="return confirm('送信してよろしいですか？')">
 				<ul th:if="${#fields.hasErrors()}">
 					<li th:each="error : ${#fields.detailedErrors()}">
 						<font color="red"><span th:text="${error.message}"></span></font>
@@ -64,12 +65,14 @@
 								</th:block>
 								<td class="w140">[[${dailyAttendanceForm.dispTrainingDate}]]</td>
 								<td class="w140">[[${dailyAttendanceForm.sectionName}]]</td>
-								<td class="w60"><input type="button" class="btn btn-success default-button"
-										value="定時" /></td>
+								<td class="w60"><input type="button" 
+										class="btn btn-success default-button"
+										value="定時"
+										th:onclick="|inputTeiji('${stat.index}')|" /></td>
 								<td class="w70">
 									<select th:name="|attendanceList[${stat.index}].hourOfTrainingStartTime|"
-										class="form-control"
-										th:errorclass="errorInput">
+										class="form-control" th:errorclass="errorInput"
+										th:id ="'hourOfTrainingStartTime' + ${stat.index}">
 										<option th:each="hourOfTrainingStartTime : ${attendanceForm.hourTimes}"
 											th:value="${hourOfTrainingStartTime.key}" th:inlne="text"
 											class="form-control"
@@ -80,8 +83,8 @@
 								<td>:</td>
 								<td class="w70">
 									<select th:name="|attendanceList[${stat.index}].minuteOfTrainingStartTime|"
-										class="form-control"
-										th:errorclass="errorInput">
+										class="form-control" th:errorclass="errorInput"
+										th:id ="'minuteOfTrainingStartTime' + ${stat.index}">
 										<option th:each="minuteOfTrainingStartTime : ${attendanceForm.minTimes}"
 											th:value="${minuteOfTrainingStartTime.key}" th:inlne="text"
 											class="form-control"
@@ -91,8 +94,8 @@
 								</td>
 								<td class="w70">
 									<select th:name="|attendanceList[${stat.index}].hourOfTrainingEndTime|"
-										class="form-control"
-										th:errorclass="errorInput">
+										class="form-control" th:errorclass="errorInput"
+										th:id ="'hourOfTrainingEndTime' + ${stat.index}">
 										<option th:each="hourOfTrainingEndTime : ${attendanceForm.hourTimes}"
 											th:value="${hourOfTrainingEndTime.key}" th:inlne="text" class="form-control"
 											th:selected="${hourOfTrainingEndTime.key == dailyAttendanceForm.hourOfTrainingEndTime}">
@@ -102,8 +105,8 @@
 								<td>:</td>
 								<td class="w70">
 									<select th:name="|attendanceList[${stat.index}].minuteOfTrainingEndTime|"
-										class="form-control"
-										th:errorclass="errorInput">
+										class="form-control" th:errorclass="errorInput"
+										th:id ="'minuteOfTrainingEndTime' + ${stat.index}">
 										<option th:each="minuteOfTrainingEndTime : ${attendanceForm.minTimes}"
 											th:value="${minuteOfTrainingEndTime.key}" th:inlne="text"
 											class="form-control"
@@ -113,7 +116,7 @@
 								</td>
 								<td class="w120">
 									<select th:name="|attendanceList[${stat.index}].blankTime|" class="form-control"
-									th:errorclass="errorInput">
+										th:errorclass="errorInput">
 										<option th:each="blankTime : ${attendanceForm.blankTimes}"
 											th:value="${blankTime.key}" th:inlne="text" class="form-control"
 											th:selected="${blankTime.key == dailyAttendanceForm.blankTime}">
@@ -144,6 +147,23 @@
 			</form>
 		</div>
 	</div>
+	<!--task28 定時ボタンによるデフォルト入力-->
+	<script type="text/javascript" th:inline="javascript">
+		 function inputTeiji(index) {
+    	 const hourOfTrainingStartTime = document.getElementById("hourOfTrainingStartTime" + index);
+    	 const minuteOfTrainingStartTime = document.getElementById("minuteOfTrainingStartTime" + index);
+    	 const hourOfTrainingEndTime = document.getElementById("hourOfTrainingEndTime" + index);
+    	 const minuteOfTrainingEndTime = document.getElementById("minuteOfTrainingEndTime" + index);
+   		 const optionsForHourOfTrainingStartTime = hourOfTrainingStartTime.options;
+   		 const optionsForMinuteOfTrainingStartTime = minuteOfTrainingStartTime.options;
+   		 const optionsForHourOfTrainingEndTime = hourOfTrainingEndTime.options;
+   		 const optionsForMinuteOfTrainingEndTime = minuteOfTrainingEndTime.options;
+    	 optionsForHourOfTrainingStartTime[10].selected = true;
+    	 optionsForMinuteOfTrainingStartTime[1].selected = true;
+    	 optionsForHourOfTrainingEndTime[19].selected = true;
+    	 optionsForMinuteOfTrainingEndTime[1].selected = true;
+    	 }
+	</script>
 </body>
 
 </html>
