@@ -396,7 +396,6 @@ public class StudentAttendanceService {
 	public void updateInputCheck(AttendanceForm attendanceForm, BindingResult result) throws ParseException {
 		int i = 0;
 		for (DailyAttendanceForm da : attendanceForm.getAttendanceList()) {
-			System.out.println(da.getNote().length());
 			if (da.getNote().length() > 100) {
 				result.rejectValue("attendanceList[" + i + "].note", "maxlength", new Object[] { "備考", 100 }, null);
 			}
@@ -405,19 +404,17 @@ public class StudentAttendanceService {
 				if (da.getHourOfTrainingStartTime() == null) {
 					result.rejectValue("attendanceList[" + i + "].hourOfTrainingStartTime", "input.invalid",
 							new Object[] { "出勤時間" }, null);
-				}
-				if (da.getMinuteOfTrainingStartTime() != null) {
+				}else {
 					result.rejectValue("attendanceList[" + i + "].minuteOfTrainingStartTime", "input.invalid",
 							new Object[] { "出勤時間" }, null);
 				}
 			}
 			if ((da.getHourOfTrainingEndTime() != null && da.getMinuteOfTrainingEndTime() == null)
 					|| (da.getHourOfTrainingEndTime() == null && da.getMinuteOfTrainingEndTime() != null)) {
-				if (da.getHourOfTrainingStartTime() == null) {
+				if (da.getHourOfTrainingEndTime() == null) {
 					result.rejectValue("attendanceList[" + i + "].hourOfTrainingEndTime", "input.invalid",
 							new Object[] { "退勤時間" }, null);
-				}
-				if (da.getMinuteOfTrainingStartTime() == null) {
+				} else {
 					result.rejectValue("attendanceList[" + i + "].minuteOfTrainingEndTime", "input.invalid",
 							new Object[] { "退勤時間" }, null);
 				}
@@ -428,13 +425,16 @@ public class StudentAttendanceService {
 						new Object[] { "退勤時間" }, null);
 			}
 			if (da.getTrainingStartTime() != null && da.getTrainingEndTime() != null) {
-				SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
-				Date start = sdf.parse(da.getTrainingStartTime());
-				Date end = sdf.parse(da.getTrainingEndTime());
-				if (start.after(end)) {
+				if(da.getHourOfTrainingStartTime() > da.getHourOfTrainingEndTime()){
 					result.rejectValue("attendanceList[" + i + "].hourOfTrainingEndTime",
 							"attendance.trainingTimeRange",
 							new Object[] { i }, null);
+				} else if(da.getHourOfTrainingStartTime() == da.getHourOfTrainingEndTime()) {
+					if(da.getMinuteOfTrainingStartTime() > da.getMinuteOfTrainingEndTime()) {
+						result.rejectValue("attendanceList[" + i + "].minuteOfTrainingEndTime",
+								"attendance.trainingTimeRange",
+								new Object[] { i }, null);
+					}
 				}
 			}
 			if (da.getBlankTime() != null) {
