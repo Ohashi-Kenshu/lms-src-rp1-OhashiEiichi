@@ -4,9 +4,11 @@ import java.text.ParseException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -155,5 +157,14 @@ public class AttendanceController {
 
 		return "attendance/detail";
 	}
-
+	
+	/**
+	 * task 57 勤怠情報管理(受講生一覧)
+	 * @author 大橋
+	 */
+	@GetMapping("/list")
+	public String studentIndex(Model model, Pageable pageable) {
+		
+		return "attendance/searchStudent";
+	}
 }

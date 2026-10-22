@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jp.co.sss.lms.mapper.MStudentSearchMapper">
+ <resultMap type="jp.co.sss.lms.dto.StudentSearchListDto" id="resultLIst">
+ <id column="lms_user_id" property="userId" />
+ <result column="user_name" property="userName" />
+ <result column="course_name" property="courseName"/>
+ <result column="company_name" property="companyName"/>
+ <result column="place_name" property="placeName"/>
+ </resultMap>
+  <select id="getList" resultType="resultList">
+ SELECT 
+ 	t1.lms_user_id, 
+ 	t2.user_name, 
+ 	t4.course_name, 
+ 	t6.company_name, 
+ 	place_name
+ FROM m_lms_user t1
+ LEFT OUTER JOIN m_user t2 ON t1.user_id = t2.user_id AND delete_flg = 0
+ LEFT OUTER JOIN t_course_user t3 ON t1.lms_user_id = t3.lme_user_id AND delete_flg = 0
+ LEFT OUTER JOIN m_course t4 ON t3.course_id = t4.course_id AND delete_flg = 0
+ LEFT OUTER JOIN t_user_company t5 ON t1.lms_user_id = t5.lms_user_id AND delete_flg = 0
+ LEFT OUTER JOIN m.company t6 ON t5.company_id = t6.company_id AND delete_flg = 0
+ LEFT OUTER JOIN t_user_place t7 ON t1.lms_user_id = t7.lms_user_id AND delete_flg = 0
+ LEFT OUTER JOIN m_place t8 ON t7.place_id = t8.place_id AND delete_flg = 0
+ WHERE t4.course_name = #{placeName}
+  </select>
+ 
+  <select id="getSearchResult" resultType="resultList">
+ SELECT 
+ 	t1.lms_user_id, 
+ 	t2.user_name, 
+ 	t4.course_name, 
+ 	t6.company_name, 
+ 	place_name
+ FROM m_lms_user t1
+ LEFT OUTER JOIN m_user t2 ON t1.user_id = t2.user_id AND delete_flg = 0
+ LEFT OUTER JOIN t_course_user t3 ON t1.lms_user_id = t3.lme_user_id AND delete_flg = 0
+ LEFT OUTER JOIN m_course t4 ON t3.course_id = t4.course_id AND delete_flg = 0
+ LEFT OUTER JOIN t_user_company t5 ON t1.lms_user_id = t5.lms_user_id AND delete_flg = 0
+ LEFT OUTER JOIN m.company t6 ON t5.company_id = t6.company_id AND delete_flg = 0
+ LEFT OUTER JOIN t_user_place t7 ON t1.lms_user_id = t7.lms_user_id AND delete_flg = 0
+ LEFT OUTER JOIN m_place t8 ON t7.place_id = t8.place_id AND delete_flg = 0
+ WHERE t4.course_name = #{placeName}
+ <!--製造中　動的SQLでFormに入力された値のみWHERE ANDに追加 -->
+  </select>
+ 
+ </mapper>
