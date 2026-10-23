@@ -360,7 +360,7 @@ public class StudentAttendanceService {
 	 * @author 大橋 task25
 	 * @return boolean 未入力あり:true 未入力なし:false
 	 */
-	public boolean notEnterCheck() throws ParseException {
+	public Boolean notEnterCheck() throws ParseException {
 		//同日を除外するため、時刻を除いて形式設定
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 		//現在の時刻を取得
@@ -372,11 +372,7 @@ public class StudentAttendanceService {
 		//過去日の未入力件数を取得
 		Integer emptyCount = tStudentAttendanceMapper.notEnterCount(loginUserDto.getLmsUserId(), deleteFlg, now);
 		//未入力があれば真、なければ偽を返す
-		if (emptyCount > 0) {
-			return true;
-		} else {
-			return false;
-		}
+		return emptyCount > 0;
 	}
 
 	
