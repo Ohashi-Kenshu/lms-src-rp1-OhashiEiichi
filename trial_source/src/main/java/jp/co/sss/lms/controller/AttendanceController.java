@@ -46,13 +46,17 @@ public class AttendanceController {
 	 */
 	@RequestMapping(path = "/detail", method = RequestMethod.GET)
 	public String index(Model model) throws ParseException {
+		Integer courseId = loginUserDto.getCourseId();
+		Integer lmsUserId = loginUserDto.getLmsUserId();
+		//大橋-task.25
+		//現在より過去に未入力が無いかチェック(サービスクラス)
 		boolean hasNotEnter = studentAttendanceService.notEnterCheck();
 		model.addAttribute("hasNotEnter", hasNotEnter);
 		// 勤怠一覧の取得
+		//上で設定した2種のIDを引数に、勤怠情報リストを取得
 		List<AttendanceManagementDto> attendanceManagementDtoList = studentAttendanceService
-				.getAttendanceManagement(loginUserDto.getCourseId(), loginUserDto.getLmsUserId());
+				.getAttendanceManagement(courseId, lmsUserId);
 		model.addAttribute("attendanceManagementDtoList", attendanceManagementDtoList);
-
 		return "attendance/detail";
 	}
 

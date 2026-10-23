@@ -356,15 +356,22 @@ public class StudentAttendanceService {
 	}
 
 	/**
-	 * @author 大橋
-	 * 
+	 * 勤怠管理画面遷移時に未入力チェック・通知
+	 * @author 大橋 task25
+	 * @return boolean 未入力あり:true 未入力なし:false
 	 */
 	public boolean notEnterCheck() throws ParseException {
+		//同日を除外するため、時刻を除いて形式設定
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+		//現在の時刻を取得
 		Date now = new Date();
+		//形式に合わせて丸める
 		String today = sdf.format(now);
 		now = sdf.parse(today);
-		Integer emptyCount = tStudentAttendanceMapper.notEnterCount(loginUserDto.getLmsUserId(), (short) 0, now);
+		short deleteFlg = 0;
+		//過去日の未入力件数を取得
+		Integer emptyCount = tStudentAttendanceMapper.notEnterCount(loginUserDto.getLmsUserId(), deleteFlg, now);
+		//未入力があれば真、なければ偽を返す
 		if (emptyCount > 0) {
 			return true;
 		} else {
@@ -372,6 +379,8 @@ public class StudentAttendanceService {
 		}
 	}
 
+	
+	
 	/**
 	 *出退勤時間をhh:mmに変換 
 	 */
