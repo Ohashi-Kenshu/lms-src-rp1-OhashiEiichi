@@ -4,19 +4,162 @@
 <head>
 	<meta charset="UTF-8">
 	<title>勤怠情報確認(受講生一覧)｜LMS</title>
-	<style>
-	</style>
+	<link rel="stylesheet" type="text/css" href="../../css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="../../css/dataTables.bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="../../css/bootstrap-datepicker.min.css">
+	<link rel="stylesheet" type="text/css" href="../../css/lms.css">
+	<link rel="stylesheet" type="text/css" href="../../css/jstree.css">
+	<link rel="shortcut icon" href="../../img/favicon.ico">
+
+	<script type="text/javascript" src="../../js/jquery.2.1.1.min.js"></script>
+	<script type="text/javascript" src="../../js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="../../js/dataTables.bootstrap.min.js"></script>
+	<script type="text/javascript" src="../../js/bootstrap-datepicker.min.js"></script>
+	<script type="text/javascript" src="../../js/bootstrap-datepicker.ja.min.js"></script>
+	<script type="text/javascript" src="../../js/lms_common.js"></script>
+	<script type="text/javascript" src="../../js/jstree.min.js"></script>
+	<script type="text/javascript" src="../../js/currency.js"></script>
+	<script type="text/javascript" src="../../js/bootstrap.min.js"></script>
+
 </head>
 
 <body>
-	<h2 class="title">勤怠情報確認<font size="5" color="#c0c0c0">(受講生一覧)</font></h2>
-	
-	<div class="form-container">
+	<div id="wrap">
+		<div class="container">
+			<div id="contents" class="clearfix">
+				<div id="main" class="main2clm">
+					<h2>勤怠情報確認<small>（受講生一覧）</small></h2>
+					<div class="well bs-component">
+						<form th:action="@{/attendance/list/search}" method="post" th:object="${studentSearchForm}"
+							class="form-horizontal">
+							<fieldset>
+								<legend>検索</legend>
+								<div class="form-group">
+									<label for="courseName" class="col-lg-2 control-label">コース名</label>
+									<div class="col-lg-10">
+										<input type="text" th:field="*{courseName}" value="" id="courseName"
+											class="form-control" list="courselist">
+										<datalist id="courselist">
+											</option>
+											<option value="1月成果報告単体コース">
+											</option>
+										</datalist>
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="placeName" class="col-lg-2 control-label">会場名</label>
+									<div class="col-lg-10">
+										<input type="text" th:field="*{placeName}" readonly="readonly" id="placeName"
+											class="form-control">
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="companyName" class="col-lg-2 control-label">企業名</label>
+									<div class="col-lg-10">
+										<input type="text" th:field="*{companyName}" value="" id="companyName"
+											class="form-control" list="companylist">
+										<datalist id="companylist">
+											</option>
+											<option value="動作確認【デモ】">
+											</option>
+										</datalist>
+									</div>
+								</div>
 
-	</div>
-	<div class="list-container">
+								<div class="form-group">
+									<label for="userName" class="col-lg-2 control-label">ユーザー名</label>
+									<div class="col-lg-10">
+										<input type="text" th:field="*{userName}" value="" id="userName" class="form-control">
 
+									</div>
+								</div>
+
+								<div class="form-group">
+									<div class="col-lg-10 col-lg-offset-2">
+										<input type="submit" name="search" value="検索" class="btn btn-primary">
+									</div>
+								</div>
+							</fieldset>
+						</form>
+					</div>
+
+
+					<div id="DataTables_Table_0_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+						<div class="row">
+							<div class="col-sm-6">
+								<div class="dataTables_length" id="DataTables_Table_0_length">
+
+								</div>
+							</div>
+							<div class="col-sm-6"></div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12">
+								<table class="table table-hover sortabletable dataTable no-footer"
+									id="DataTables_Table_0" role="grid" aria-describedby="DataTables_Table_0_info">
+									<thead>
+										<tr role="row">
+											<th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0"
+												rowspan="1" colspan="1" aria-sort="ascending"
+												aria-label="ユーザーID: activate to sort column descending">ユーザーID</th>
+											<th class="sorting" tabindex="0" aria-controls="DataTables_Table_0"
+												rowspan="1" colspan="1"
+												aria-label="ユーザー名: activate to sort column ascending">ユーザー名</th>
+											<th class="sorting" tabindex="0" aria-controls="DataTables_Table_0"
+												rowspan="1" colspan="1"
+												aria-label="コース名: activate to sort column ascending">コース名</th>
+											<th class="sorting" tabindex="0" aria-controls="DataTables_Table_0"
+												rowspan="1" colspan="1"
+												aria-label="企業名: activate to sort column ascending">企業名</th>
+											<th class="sorting" tabindex="0" aria-controls="DataTables_Table_0"
+												rowspan="1" colspan="1"
+												aria-label="会場: activate to sort column ascending">会場</th>
+											<th class="sorting" tabindex="0" aria-controls="DataTables_Table_0"
+												rowspan="1" colspan="1"
+												aria-label="勤怠: activate to sort column ascending">勤怠</th>
+										</tr>
+									</thead>
+									<tbody>
+										<th:block th:each="result : ${resultList}">
+										<tr role="row" class="odd">
+											<td class="sorting_1" th:text="${result.userId}"></td>
+											<td th:text="${result.userName}"></td>
+											<td th:text="${result.courseName}"></td>
+											<td th:text="${result.companyName}"></td>
+											<td th:text="${result.placeName}"></td>
+											<td>
+												<form name="attendance_updateActionForm" method="post"
+													action="../attendance/detail.html">
+													<input type="hidden" th:value="${result.userId}">
+													<input type="submit" value="勤怠確認" class="btn btn-default">
+												</form>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-5">
+							</div>
+							<div class="col-sm-7">
+								<div class="dataTables_paginate paging_simple_numbers" id="DataTables_Table_0_paginate">
+								</div>
+							</div>
+						</div>
+					</div>
+
+
+				</div>
+				<!--#main-->
+			</div>
+			<!--#contents-->
+			<form id="screenTransForm" name="screenTransForm" method="post">
+			</form>
+			<div id="push"></div>
+		</div>
 	</div>
 </body>
+
 
 </html>

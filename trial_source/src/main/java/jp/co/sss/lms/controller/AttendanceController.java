@@ -4,20 +4,24 @@ import java.text.ParseException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.validation.Valid;
 import jp.co.sss.lms.dto.AttendanceManagementDto;
 import jp.co.sss.lms.dto.LoginUserDto;
+import jp.co.sss.lms.dto.StudentSearchResultDto;
 import jp.co.sss.lms.form.AttendanceForm;
+import jp.co.sss.lms.form.StudentSearchForm;
 import jp.co.sss.lms.service.StudentAttendanceService;
+import jp.co.sss.lms.service.StudentSearchService;
 import jp.co.sss.lms.util.AttendanceUtil;
 import jp.co.sss.lms.util.Constants;
 
@@ -32,6 +36,8 @@ public class AttendanceController {
 
 	@Autowired
 	private StudentAttendanceService studentAttendanceService;
+	@Autowired
+	private StudentSearchService studentSearchService;
 	@Autowired
 	private LoginUserDto loginUserDto;
 
@@ -165,10 +171,26 @@ public class AttendanceController {
 	/**
 	 * task 57 勤怠情報管理(受講生一覧)
 	 * @author 大橋
+	 * 指定件数に応じて受講生検索結果一覧を表示
 	 */
 	@GetMapping("/list")
-	public String studentIndex(Model model, Pageable pageable) {
-		
+	public String studentIndex(@ModelAttribute StudentSearchForm studentSearchForm, Model model) {
+		studentSearchForm = new StudentSearchForm();
+		int limit = 10;
+		int page = 1;
+		String sortOrder = "ASC";
+		studentSearchForm.setPlaceName(loginUserDto.getPlaceName());
+		List<StudentSearchResultDto> resultList = studentSearchService.searchStudent(studentSearchForm, limit, page, null, sortOrder);
+		model.addAttribute("studentSearchForm", studentSearchForm);
+		model.addAttribute("resultList", resultList);
+		return "attendance/searchStudent";
+	}
+	@PostMapping("/list/search")
+	public String searchStudent(@ModelAttribute StudentSearchForm studentSearchForm,
+								@RequestParam(defaultValue = "10") int limit, @RequestParam(defaultValue = "1") int page,
+								@RequestParam(defaultValue="") String sortBy, @RequestParam(defaultValue="ASC") String sortOrder , Model model) {
+		List<StudentSearchResultDto> resultList = studentSearchService.searchStudent(studentSearchForm, limit, page, sortBy, sortOrder);
+		model.addAttribute("resultList", resultList);
 		return "attendance/searchStudent";
 	}
 }

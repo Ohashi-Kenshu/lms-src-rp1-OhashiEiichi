@@ -10,6 +10,8 @@ import lombok.Data;
  */
 @Data
 public class StudentSearchForm {
+	/**ユーザーID*/
+	private Integer userId;
 	/**コース名*/
 	private String courseName;
 	/**会場名*/

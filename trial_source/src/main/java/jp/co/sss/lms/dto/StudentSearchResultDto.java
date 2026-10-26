@@ -7,7 +7,7 @@ import lombok.Data;
  *@author 大橋 
  */
 @Data
-public class StudentSearchListDto {
+public class StudentSearchResultDto {
 	/**ユーザーID*/
 	private Integer userId;
 	/**ユーザー名*/
