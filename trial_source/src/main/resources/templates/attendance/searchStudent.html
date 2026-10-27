@@ -30,7 +30,7 @@
 				<div id="main" class="main2clm">
 					<h2>勤怠情報確認<small>（受講生一覧）</small></h2>
 					<div class="well bs-component">
-						<form th:action="@{/attendance/list/search}" method="post" th:object="${studentSearchForm}"
+						<form th:action="@{/attendance/list}" method="post" th:object="${studentSearchForm}"
 							class="form-horizontal">
 							<fieldset>
 								<legend>検索</legend>
@@ -76,7 +76,7 @@
 
 								<div class="form-group">
 									<div class="col-lg-10 col-lg-offset-2">
-										<input type="submit" name="search" value="検索" class="btn btn-primary">
+										<input type="submit" value="検索" class="btn btn-primary">
 									</div>
 								</div>
 							</fieldset>

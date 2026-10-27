@@ -9,9 +9,7 @@ import jp.co.sss.lms.dto.StudentSearchResultDto;
 import jp.co.sss.lms.form.StudentSearchForm;
 @Mapper
 public interface MStudentSearchMapper {
-	List<StudentSearchResultDto> getList(@Param("form")StudentSearchForm searchForm, 
-										 @Param("limit")int limit, @Param("offset")int offset,
-										 @Param("sortBy")String sortBy, @Param("sortOrder")String sortOrder);
-	
+	List<StudentSearchResultDto> getList(@Param("form")StudentSearchForm searchForm);
+	List<StudentSearchResultDto> getSearchResult(@Param("form")StudentSearchForm searchForm);
 }
 

@@ -15,10 +15,15 @@ public class StudentSearchService {
 	@Autowired 
 	private MStudentSearchMapper mStudentSearchMapper;
 	
-	public List<StudentSearchResultDto> searchStudent(StudentSearchForm studensSearchForm, int limit, int page, String sortBy, String sortOrder) {
+	public List<StudentSearchResultDto> getIndex(StudentSearchForm studensSearchForm) {
 		List<StudentSearchResultDto> list = new ArrayList<>();
-		int offset = limit * (page - 1);
-		list = mStudentSearchMapper.getList(studensSearchForm, limit, offset, sortBy, sortOrder);
+		list = mStudentSearchMapper.getList(studensSearchForm);
+		return list;
+		
+	}
+	public List<StudentSearchResultDto> getResult(StudentSearchForm studensSearchForm) {
+		List<StudentSearchResultDto> list = new ArrayList<>();
+		list = mStudentSearchMapper.getSearchResult(studensSearchForm);
 		return list;
 		
 	}
