@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jp.co.sss.lms.mapper.MPlaceMapper">
+
+	<select id="getPlaceInfoById" resultType="jp.co.sss.lms.dto.PlaceDto">
+	SELECT t3.place_id AS placeId,
+		   t3.place_name AS placeName,
+		   t3.place_discription AS placeDiscription,
+		   t3.support_available AS supportAvailable,
+		   t3.seating_capacity AS seatingCapacity,
+		   t3.place_note AS placeNote,
+		   t3.hidden_flg AS hiddenFlg
+	FROM m_lms_user t
+	LEFT OUTER JOIN t_user_place t2 
+	ON t.lms_user_id = t2.lms_user_id AND t.delete_flg = #{deleteFlg}
+	LEFT OUTER JOIN m_place t3 ON t2.place_id = t3.place_id
+	WHERE t.lms_user_id = #{lmsUserId}
+	AND t3.hidden_flg = #{hiddenFlg;
+	</select>
+
+</mapper>

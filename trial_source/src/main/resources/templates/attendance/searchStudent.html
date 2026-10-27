@@ -161,6 +161,15 @@
 			<div id="push"></div>
 		</div>
 	</div>
+	<!--task25を流用-->
+	<script type="text/javascript" th:inline="javascript">
+		const hasNotEnter = /*[[${hasNotEnter}]]*/ false;
+		window.addEventListener('DOMContentLoaded', function () {
+			if (hasNotEnter) {
+				alert('過去日の勤怠に未入力があります。');
+			}
+		})
+	</script>
 </body>
 
 

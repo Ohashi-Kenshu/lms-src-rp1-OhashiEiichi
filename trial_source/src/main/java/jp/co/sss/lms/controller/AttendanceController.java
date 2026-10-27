@@ -18,6 +18,7 @@ import jp.co.sss.lms.dto.AttendanceManagementDto;
 import jp.co.sss.lms.dto.LoginUserDto;
 import jp.co.sss.lms.dto.StudentSearchResultDto;
 import jp.co.sss.lms.form.AttendanceForm;
+import jp.co.sss.lms.form.BulkRegistForm;
 import jp.co.sss.lms.form.StudentSearchForm;
 import jp.co.sss.lms.service.StudentAttendanceService;
 import jp.co.sss.lms.service.StudentSearchService;
@@ -171,17 +172,26 @@ public class AttendanceController {
 	 * task 57 勤怠情報管理(受講生一覧)
 	 * @author 大橋
 	 * 指定件数に応じて受講生検索結果一覧を表示
+	 * @throws ParseException 
 	 */
 	@GetMapping("/list")
-	public String studentIndex(@ModelAttribute StudentSearchForm studentSearchForm, Model model) {
+	public String studentIndex(@ModelAttribute StudentSearchForm studentSearchForm, Model model) throws ParseException {
 		studentSearchForm.setPlaceName(loginUserDto.getPlaceName());
 		List<StudentSearchResultDto> resultList = studentSearchService.getIndex(studentSearchForm);
 		List<StudentSearchResultDto> courseList = studentSearchService.getCourseList(studentSearchForm);
 		List<StudentSearchResultDto> companyList = studentSearchService.getCompanyList(studentSearchForm);
-		model.addAttribute("studentSearchForm", studentSearchForm);
+		boolean hasNotEnter = false;
+		//resultList内の各lmsUserIdについて、過去日の勤怠未入力を判定　１件目の検知で中断、trueを返す
+		for(StudentSearchResultDto result : resultList) {
+			if(studentAttendanceService.notEnterCheckForTeacher(result.getUserId())) {
+				hasNotEnter = true;
+				break;
+			}
+		}
 		model.addAttribute("resultList", resultList);
 		model.addAttribute("courseList", courseList);
 		model.addAttribute("companyList", companyList);
+		model.addAttribute("hasNotEnter", hasNotEnter);
 		return "attendance/searchStudent";
 	}
 
@@ -190,20 +200,33 @@ public class AttendanceController {
 	 * 
 	 * @param model
 	 * @return 勤怠情報直接変更画面
+	 * @throws ParseException 
 	 */
 	@PostMapping("/list")
-	public String searchStudent(@ModelAttribute StudentSearchForm studentSearchForm, Model model) {
+	public String searchStudent(@ModelAttribute StudentSearchForm studentSearchForm, Model model) throws ParseException {
 		List<StudentSearchResultDto> resultList = studentSearchService.getResult(studentSearchForm);
 		List<StudentSearchResultDto> courseList = studentSearchService.getCourseList(studentSearchForm);
 		List<StudentSearchResultDto> companyList = studentSearchService.getCompanyList(studentSearchForm);
+		boolean hasNotEnter = false;
+		for(StudentSearchResultDto result : resultList) {
+			if(studentAttendanceService.notEnterCheckForTeacher(result.getUserId())) {
+				hasNotEnter = true;
+				break;
+			}
+		}
 		model.addAttribute("resultList", resultList);
 		model.addAttribute("courseList", courseList);
 		model.addAttribute("companyList", companyList);
+		model.addAttribute("hasNotEnter", hasNotEnter);
 		return "attendance/searchStudent";
 	}
 	@GetMapping("/bulkRegist")
-	public String getBulkList() {
-		
+	public String getBulkList(@ModelAttribute BulkRegistForm bulkRegistForm) {
+		studentAttendanceService.setBulkRegistForm(bulkRegistForm);
 		return "attendance/bulkRegist";
+	}
+	@PostMapping("/bulkRegist/search")
+	public String searchBulkList(@ModelAttribute BulkRegistForm bulkRegistForm, BindingResult result) {
+		
 	}
 }

@@ -10,12 +10,15 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 
 import jp.co.sss.lms.dto.AttendanceManagementDto;
 import jp.co.sss.lms.dto.LoginUserDto;
+import jp.co.sss.lms.dto.PlaceDto;
 import jp.co.sss.lms.entity.TStudentAttendance;
 import jp.co.sss.lms.enums.AttendanceStatusEnum;
 import jp.co.sss.lms.form.AttendanceForm;
+import jp.co.sss.lms.form.BulkRegistForm;
 import jp.co.sss.lms.form.DailyAttendanceForm;
 import jp.co.sss.lms.mapper.TStudentAttendanceMapper;
 import jp.co.sss.lms.util.AttendanceUtil;
@@ -46,6 +49,8 @@ public class StudentAttendanceService {
 	private LoginUserDto loginUserDto;
 	@Autowired
 	private TStudentAttendanceMapper tStudentAttendanceMapper;
+	@Autowired
+	private PlaceService placeService;
 
 	/**
 	 * 勤怠一覧情報取得
@@ -375,8 +380,6 @@ public class StudentAttendanceService {
 		return emptyCount > 0;
 	}
 
-	
-	
 	/**
 	 *出退勤時間をhh:mmに変換 
 	 */
@@ -409,7 +412,7 @@ public class StudentAttendanceService {
 				if (da.getHourOfTrainingStartTime() == null) {
 					result.rejectValue("attendanceList[" + i + "].hourOfTrainingStartTime", "input.invalid",
 							new Object[] { "出勤時間" }, null);
-				}else {
+				} else {
 					result.rejectValue("attendanceList[" + i + "].minuteOfTrainingStartTime", "input.invalid",
 							new Object[] { "出勤時間" }, null);
 				}
@@ -430,12 +433,12 @@ public class StudentAttendanceService {
 						new Object[] { "退勤時間" }, null);
 			}
 			if (da.getTrainingStartTime() != null && da.getTrainingEndTime() != null) {
-				if(da.getHourOfTrainingStartTime() > da.getHourOfTrainingEndTime()){
+				if (da.getHourOfTrainingStartTime() > da.getHourOfTrainingEndTime()) {
 					result.rejectValue("attendanceList[" + i + "].hourOfTrainingEndTime",
 							"attendance.trainingTimeRange",
 							new Object[] { i }, null);
-				} else if(da.getHourOfTrainingStartTime() == da.getHourOfTrainingEndTime()) {
-					if(da.getMinuteOfTrainingStartTime() > da.getMinuteOfTrainingEndTime()) {
+				} else if (da.getHourOfTrainingStartTime() == da.getHourOfTrainingEndTime()) {
+					if (da.getMinuteOfTrainingStartTime() > da.getMinuteOfTrainingEndTime()) {
 						result.rejectValue("attendanceList[" + i + "].minuteOfTrainingEndTime",
 								"attendance.trainingTimeRange",
 								new Object[] { i }, null);
@@ -459,6 +462,66 @@ public class StudentAttendanceService {
 
 			}
 			i++;
+		}
+	}
+
+	/**
+	 * task57 未入力通知のためのサービス
+	 * task25 過去日の勤怠未入力検知メソッドを、lmsUserIdを任意に指定できるように修正
+	 * */
+	public Boolean notEnterCheckForTeacher(int lmsUserId) throws ParseException {
+		//同日を除外するため、時刻を除いて形式設定
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+		//現在の時刻を取得
+		Date now = new Date();
+		//形式に合わせて丸める
+		String today = sdf.format(now);
+		now = sdf.parse(today);
+		//過去日の未入力件数を取得
+		Integer emptyCount = tStudentAttendanceMapper.notEnterCount(lmsUserId, Constants.DB_FLG_FALSE, now);
+		//未入力があれば真、なければ偽を返す
+		return emptyCount > 0;
+	}
+	/***
+	 * task58 勤怠一括登録　フォーム設定
+	 * @param bulkRegistForm
+	 */
+	public void setBulkRegistForm(BulkRegistForm bulkRegistForm) {
+		PlaceDto placeDto = new PlaceDto();
+		placeDto = placeService.getPlaceInfoById(loginUserDto.getLmsUserId());
+		if(placeDto.getPlaceName() != null || !placeDto.getPlaceName().isEmpty()) {
+		String placeNote = placeDto.getPlaceNote();
+		String separator = "$";
+		int firstSep = placeNote.indexOf(separator);
+		int secondSep = placeNote.indexOf(separator, firstSep + 1);
+		String classRoom = placeNote.substring(firstSep, secondSep);
+		if(classRoom != null && classRoom.length() > 0) {
+		bulkRegistForm.setPlaceName(
+				placeDto.getPlaceName() + "(" + classRoom + ")" );
+		} else {
+			bulkRegistForm.setPlaceName(
+			placeDto.getPlaceName() + "(" + null + ")" );
+		}
+		} 
+	}
+	public void checkBulkRegistForm (BulkRegistForm form, BindingResult result) throws ParseException {
+		if(result.hasErrors()) {
+		return;
+		} else {
+			//同日を除外するため、時刻を除いて形式設定
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+			//現在の時刻を取得
+			Date now = new Date();
+			//形式に合わせて丸める
+			String today = sdf.format(now);
+			now = sdf.parse(today);
+			if(form.getToDate().after(now)) {
+				 result.addError(new FieldError(result.getObjectName(), "searchPeriodFrom",messageUtil.getMessage(Constants.VALID_KEY_SEARCHTORANGEERROR,new String[] { "期間（from）" })));
+				    return;
+			} else if(form.getFromDate().after(form.getToDate())) {
+				result.addError(new FieldError(result.getObjectName(), "searchPeriodFrom",messageUtil.getMessage(Constants.VALID_KEY_SEARCHTORANGEERROR,new String[] { "期間（from）" })));	
+				return
+			}
 		}
 	}
 }
