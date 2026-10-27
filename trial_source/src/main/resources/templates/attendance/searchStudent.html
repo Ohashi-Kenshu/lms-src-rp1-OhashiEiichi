@@ -40,8 +40,9 @@
 										<input type="text" th:field="*{courseName}" value="" id="courseName"
 											class="form-control" list="courselist">
 										<datalist id="courselist">
-											</option>
-											<option value="1月成果報告単体コース">
+											<option th:each="course : ${courseList}"
+											th:if="${course != null}"
+											th:value="${course.courseName}" th:text="${course.courseName}">
 											</option>
 										</datalist>
 									</div>
@@ -59,8 +60,9 @@
 										<input type="text" th:field="*{companyName}" value="" id="companyName"
 											class="form-control" list="companylist">
 										<datalist id="companylist">
-											</option>
-											<option value="動作確認【デモ】">
+											<option th:each="company : ${companyList}" 
+											th:if="${company != null}"
+											th:value="${company.companyName}" th:text="${company.companyName}">
 											</option>
 										</datalist>
 									</div>

@@ -21,6 +21,18 @@ public class StudentSearchService {
 		return list;
 		
 	}
+	public List<StudentSearchResultDto> getCourseList(StudentSearchForm studensSearchForm) {
+		List<StudentSearchResultDto> list = new ArrayList<>();
+		list = mStudentSearchMapper.getCourseList(studensSearchForm);
+		return list;
+		
+	}
+	public List<StudentSearchResultDto> getCompanyList(StudentSearchForm studensSearchForm) {
+		List<StudentSearchResultDto> list = new ArrayList<>();
+		list = mStudentSearchMapper.getCompanyList(studensSearchForm);
+		return list;
+		
+	}
 	public List<StudentSearchResultDto> getResult(StudentSearchForm studensSearchForm) {
 		List<StudentSearchResultDto> list = new ArrayList<>();
 		list = mStudentSearchMapper.getSearchResult(studensSearchForm);

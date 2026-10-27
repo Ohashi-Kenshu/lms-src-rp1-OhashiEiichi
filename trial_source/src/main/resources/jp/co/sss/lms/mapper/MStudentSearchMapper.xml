@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="jp.co.sss.lms.mapper.MStudentSearchMapper">
-	<resultMap type="jp.co.sss.lms.dto.StudentSearchResultDto" id="resultList">
+	<resultMap type="jp.co.sss.lms.dto.StudentSearchResultDto"
+		id="resultList">
 		<id column="lms_user_id" property="userId" />
 		<result column="user_name" property="userName" />
 		<result column="course_name" property="courseName" />
@@ -15,20 +16,83 @@
 		t4.course_name,
 		t6.company_name,
 		t8.place_name
-		FROM m_lms_user t1
-		LEFT OUTER JOIN m_user t2 ON t1.user_id = t2.user_id AND t2.delete_flg = 0
-		LEFT OUTER JOIN t_course_user t3 ON t1.lms_user_id = t3.lms_user_id
+		FROM
+		m_lms_user t1
+		LEFT OUTER JOIN m_user t2 ON t1.user_id = t2.user_id AND
+		t2.delete_flg = 0
+		LEFT OUTER JOIN t_course_user t3 ON t1.lms_user_id =
+		t3.lms_user_id
 		AND t3.delete_flg = 0
-		LEFT OUTER JOIN m_course t4 ON t3.course_id = t4.course_id AND t4.delete_flg
+		LEFT OUTER JOIN m_course t4 ON
+		t3.course_id = t4.course_id AND t4.delete_flg
 		= 0
-		LEFT OUTER JOIN t_user_company t5 ON t1.lms_user_id = t5.lms_user_id AND
-		t5.delete_flg = 0
+		LEFT OUTER JOIN
+		t_user_company t5 ON t1.lms_user_id = t5.lms_user_id AND
+		t5.delete_flg
+		= 0
 		LEFT OUTER JOIN m_company t6 ON t5.company_id = t6.company_id AND
 		t6.delete_flg = 0
-		LEFT OUTER JOIN t_user_place t7 ON t1.lms_user_id = t7.lms_user_id AND
+		LEFT OUTER JOIN t_user_place t7 ON t1.lms_user_id =
+		t7.lms_user_id AND
 		t7.delete_flg = 0
-		LEFT OUTER JOIN m_place t8 ON t7.place_id = t8.place_id AND t8.delete_flg = 0
-		WHERE t8.place_name = #{form.placeName}
+		LEFT OUTER JOIN m_place t8 ON
+		t7.place_id = t8.place_id AND t8.delete_flg = 0
+		WHERE t2.authority = '0001'
+		AND t8.place_name = #{form.placeName}
+	</select>
+	<select id="getCourseList" resultMap="resultList">
+		SELECT DISTINCT
+		t4.course_name
+		FROM
+		m_lms_user t1
+		LEFT OUTER JOIN m_user t2 ON t1.user_id = t2.user_id AND
+		t2.delete_flg = 0
+		LEFT OUTER JOIN t_course_user t3 ON t1.lms_user_id =
+		t3.lms_user_id
+		AND t3.delete_flg = 0
+		LEFT OUTER JOIN m_course t4 ON
+		t3.course_id = t4.course_id AND t4.delete_flg
+		= 0
+		LEFT OUTER JOIN
+		t_user_company t5 ON t1.lms_user_id = t5.lms_user_id AND
+		t5.delete_flg
+		= 0
+		LEFT OUTER JOIN m_company t6 ON t5.company_id = t6.company_id AND
+		t6.delete_flg = 0
+		LEFT OUTER JOIN t_user_place t7 ON t1.lms_user_id =
+		t7.lms_user_id AND
+		t7.delete_flg = 0
+		LEFT OUTER JOIN m_place t8 ON
+		t7.place_id = t8.place_id AND t8.delete_flg = 0
+		WHERE t2.authority = '0001'
+		AND t8.place_name = #{form.placeName}
+	</select>
+	<select id="getCompanyList" resultMap="resultList">
+		SELECT DISTINCT
+		t6.company_name
+		FROM
+		m_lms_user t1
+		LEFT OUTER JOIN m_user t2 ON t1.user_id = t2.user_id AND
+		t2.delete_flg = 0
+		LEFT OUTER JOIN t_course_user t3 ON t1.lms_user_id =
+		t3.lms_user_id
+		AND t3.delete_flg = 0
+		LEFT OUTER JOIN m_course t4 ON
+		t3.course_id = t4.course_id AND t4.delete_flg
+		= 0
+		LEFT OUTER JOIN
+		t_user_company t5 ON t1.lms_user_id = t5.lms_user_id AND
+		t5.delete_flg
+		= 0
+		LEFT OUTER JOIN m_company t6 ON t5.company_id = t6.company_id AND
+		t6.delete_flg = 0
+		LEFT OUTER JOIN t_user_place t7 ON t1.lms_user_id =
+		t7.lms_user_id AND
+		t7.delete_flg = 0
+		LEFT OUTER JOIN m_place t8 ON
+		t7.place_id = t8.place_id AND t8.delete_flg = 0
+		WHERE t2.authority = '0001' 
+		AND t8.place_name = #{form.placeName}
 	</select>
 
 	<select id="getSearchResult" resultMap="resultList">
@@ -39,28 +103,38 @@
 		t6.company_name,
 		t8.place_name
 		FROM m_lms_user t1
-		LEFT OUTER JOIN m_user t2 ON t1.user_id = t2.user_id AND t2.delete_flg = 0
-		LEFT OUTER JOIN t_course_user t3 ON t1.lms_user_id = t3.lms_user_id
+		LEFT OUTER JOIN m_user t2 ON t1.user_id
+		= t2.user_id AND t2.delete_flg = 0
+		LEFT OUTER JOIN t_course_user t3 ON
+		t1.lms_user_id = t3.lms_user_id
 		AND t3.delete_flg = 0
-		LEFT OUTER JOIN m_course t4 ON t3.course_id = t4.course_id AND
+		LEFT OUTER JOIN
+		m_course t4 ON t3.course_id = t4.course_id AND
 		t4.delete_flg = 0
-		LEFT OUTER JOIN t_user_company t5 ON t1.lms_user_id = t5.lms_user_id AND
+		LEFT
+		OUTER JOIN t_user_company t5 ON t1.lms_user_id = t5.lms_user_id AND
 		t5.delete_flg = 0
-		LEFT OUTER JOIN m_company t6 ON t5.company_id = t6.company_id AND
+		LEFT OUTER JOIN m_company t6 ON t5.company_id =
+		t6.company_id AND
 		t6.delete_flg = 0
-		LEFT OUTER JOIN t_user_place t7 ON t1.lms_user_id = t7.lms_user_id AND
+		LEFT OUTER JOIN t_user_place t7 ON
+		t1.lms_user_id = t7.lms_user_id AND
 		t7.delete_flg = 0
-		LEFT OUTER JOIN m_place t8 ON t7.place_id = t8.place_id AND t8.delete_flg
+		LEFT OUTER JOIN
+		m_place t8 ON t7.place_id = t8.place_id AND t8.delete_flg
 		= 0
-		WHERE t8.place_name = #{form.placeName}
+		WHERE t2.authority = '0001'
+		AND t8.place_name = #{form.placeName}
 		<if test="form.userName != null and form.userName != ''">
 			AND t2.user_name LIKE CONCAT('%', #{form.userName}, '%')
 		</if>
 		<if test="form.courseName != null and form.courseName != ''">
-			AND t4.course_name LIKE CONCAT('%', #{form.courseName}, '%')
+			AND t4.course_name LIKE CONCAT('%', #{form.courseName},
+			'%')
 		</if>
 		<if test="form.companyName != null and form.companyName != ''">
-			AND t6.company_name LIKE CONCAT('%', #{form.companyName}, '%')
+			AND t6.company_name LIKE CONCAT('%', #{form.companyName},
+			'%')
 		</if>
 	</select>
 

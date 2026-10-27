@@ -149,11 +149,11 @@ public class AttendanceController {
 			throws ParseException {
 		studentAttendanceService.formatConversion(attendanceForm);
 		studentAttendanceService.updateInputCheck(attendanceForm, result);
-		if(result.hasErrors()) {
+		if (result.hasErrors()) {
 			AttendanceUtil attendanceUtil = new AttendanceUtil();
 			attendanceForm.setBlankTimes(attendanceUtil.setBlankTime());
 			attendanceForm.setHourTimes(attendanceUtil.prepareHourAndMin("h"));
-			attendanceForm.setMinTimes(attendanceUtil.prepareHourAndMin("m")); 
+			attendanceForm.setMinTimes(attendanceUtil.prepareHourAndMin("m"));
 			return "attendance/update";
 		}
 		// 更新
@@ -166,18 +166,7 @@ public class AttendanceController {
 
 		return "attendance/detail";
 	}
-	/**
-	 * 勤怠管理画面 『勤怠情報を直接編集する』リンク押下
-	 * 
-	 * @param model
-	 * @return 勤怠情報直接変更画面
-	 */
-	@PostMapping("/list")
-	public String whatever(@ModelAttribute StudentSearchForm studentSearchForm, Model model) {
-		List<StudentSearchResultDto> resultList = studentSearchService.getResult(studentSearchForm);
-			model.addAttribute("resultList", resultList);
-		return "attendance/searchStudent";
-	}
+
 	/**
 	 * task 57 勤怠情報管理(受講生一覧)
 	 * @author 大橋
@@ -187,8 +176,34 @@ public class AttendanceController {
 	public String studentIndex(@ModelAttribute StudentSearchForm studentSearchForm, Model model) {
 		studentSearchForm.setPlaceName(loginUserDto.getPlaceName());
 		List<StudentSearchResultDto> resultList = studentSearchService.getIndex(studentSearchForm);
+		List<StudentSearchResultDto> courseList = studentSearchService.getCourseList(studentSearchForm);
+		List<StudentSearchResultDto> companyList = studentSearchService.getCompanyList(studentSearchForm);
 		model.addAttribute("studentSearchForm", studentSearchForm);
 		model.addAttribute("resultList", resultList);
+		model.addAttribute("courseList", courseList);
+		model.addAttribute("companyList", companyList);
 		return "attendance/searchStudent";
+	}
+
+	/**
+	 * 勤怠管理画面 『勤怠情報を直接編集する』リンク押下
+	 * 
+	 * @param model
+	 * @return 勤怠情報直接変更画面
+	 */
+	@PostMapping("/list")
+	public String searchStudent(@ModelAttribute StudentSearchForm studentSearchForm, Model model) {
+		List<StudentSearchResultDto> resultList = studentSearchService.getResult(studentSearchForm);
+		List<StudentSearchResultDto> courseList = studentSearchService.getCourseList(studentSearchForm);
+		List<StudentSearchResultDto> companyList = studentSearchService.getCompanyList(studentSearchForm);
+		model.addAttribute("resultList", resultList);
+		model.addAttribute("courseList", courseList);
+		model.addAttribute("companyList", companyList);
+		return "attendance/searchStudent";
+	}
+	@GetMapping("/bulkRegist")
+	public String getBulkList() {
+		
+		return "attendance/bulkRegist";
 	}
 }
