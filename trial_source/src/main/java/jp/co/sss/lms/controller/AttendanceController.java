@@ -226,7 +226,9 @@ public class AttendanceController {
 		return "attendance/bulkRegist";
 	}
 	@PostMapping("/bulkRegist/search")
-	public String searchBulkList(@ModelAttribute BulkRegistForm bulkRegistForm, BindingResult result) {
-		
+	public String searchBulkList(@ModelAttribute BulkRegistForm bulkRegistForm, BindingResult result, Model model) throws ParseException {
+		studentAttendanceService.searchInputCheck(bulkRegistForm, result);
+		studentAttendanceService.getUserAttendance(bulkRegistForm);
+		return "forward:/bulkRegist";
 	}
 }

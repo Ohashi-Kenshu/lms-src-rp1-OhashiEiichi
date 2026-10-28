@@ -15,11 +15,13 @@ import org.springframework.validation.FieldError;
 import jp.co.sss.lms.dto.AttendanceManagementDto;
 import jp.co.sss.lms.dto.LoginUserDto;
 import jp.co.sss.lms.dto.PlaceDto;
+import jp.co.sss.lms.dto.UserAttendanceDto;
 import jp.co.sss.lms.entity.TStudentAttendance;
 import jp.co.sss.lms.enums.AttendanceStatusEnum;
 import jp.co.sss.lms.form.AttendanceForm;
 import jp.co.sss.lms.form.BulkRegistForm;
 import jp.co.sss.lms.form.DailyAttendanceForm;
+import jp.co.sss.lms.mapper.MPlaceMapper;
 import jp.co.sss.lms.mapper.TStudentAttendanceMapper;
 import jp.co.sss.lms.util.AttendanceUtil;
 import jp.co.sss.lms.util.Constants;
@@ -51,6 +53,10 @@ public class StudentAttendanceService {
 	private TStudentAttendanceMapper tStudentAttendanceMapper;
 	@Autowired
 	private PlaceService placeService;
+	@Autowired
+	private MPlaceMapper mPlaceMapper;
+	@Autowired
+	private TrainingTime trainingTime;
 
 	/**
 	 * 勤怠一覧情報取得
@@ -482,6 +488,7 @@ public class StudentAttendanceService {
 		//未入力があれば真、なければ偽を返す
 		return emptyCount > 0;
 	}
+
 	/***
 	 * task58 勤怠一括登録　フォーム設定
 	 * @param bulkRegistForm
@@ -489,24 +496,25 @@ public class StudentAttendanceService {
 	public void setBulkRegistForm(BulkRegistForm bulkRegistForm) {
 		PlaceDto placeDto = new PlaceDto();
 		placeDto = placeService.getPlaceInfoById(loginUserDto.getLmsUserId());
-		if(placeDto.getPlaceName() != null || !placeDto.getPlaceName().isEmpty()) {
-		String placeNote = placeDto.getPlaceNote();
-		String separator = "$";
-		int firstSep = placeNote.indexOf(separator);
-		int secondSep = placeNote.indexOf(separator, firstSep + 1);
-		String classRoom = placeNote.substring(firstSep, secondSep);
-		if(classRoom != null && classRoom.length() > 0) {
-		bulkRegistForm.setPlaceName(
-				placeDto.getPlaceName() + "(" + classRoom + ")" );
-		} else {
-			bulkRegistForm.setPlaceName(
-			placeDto.getPlaceName() + "(" + null + ")" );
+		if (placeDto.getPlaceName() != null || !placeDto.getPlaceName().isEmpty()) {
+			String placeNote = placeDto.getPlaceNote();
+			String separator = "$";
+			int firstSep = placeNote.indexOf(separator);
+			int secondSep = placeNote.indexOf(separator, firstSep + 1);
+			String classRoom = placeNote.substring(firstSep, secondSep);
+			if (classRoom != null && classRoom.length() > 0) {
+				bulkRegistForm.setPlaceName(
+						placeDto.getPlaceName() + "(" + classRoom + ")");
+			} else {
+				bulkRegistForm.setPlaceName(
+						placeDto.getPlaceName() + "(" + null + ")");
+			}
 		}
-		} 
 	}
-	public void checkBulkRegistForm (BulkRegistForm form, BindingResult result) throws ParseException {
-		if(result.hasErrors()) {
-		return;
+
+	public void searchInputCheck(BulkRegistForm form, BindingResult result) throws ParseException {
+		if (result.hasErrors()) {
+			return;
 		} else {
 			//同日を除外するため、時刻を除いて形式設定
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
@@ -515,13 +523,77 @@ public class StudentAttendanceService {
 			//形式に合わせて丸める
 			String today = sdf.format(now);
 			now = sdf.parse(today);
-			if(form.getToDate().after(now)) {
-				 result.addError(new FieldError(result.getObjectName(), "searchPeriodFrom",messageUtil.getMessage(Constants.VALID_KEY_SEARCHTORANGEERROR,new String[] { "期間（from）" })));
-				    return;
-			} else if(form.getFromDate().after(form.getToDate())) {
-				result.addError(new FieldError(result.getObjectName(), "searchPeriodFrom",messageUtil.getMessage(Constants.VALID_KEY_SEARCHTORANGEERROR,new String[] { "期間（from）" })));	
-				return
+			if (form.getToDate().after(now)) {
+				result.addError(new FieldError(result.getObjectName(), "searchPeriodFrom",
+						messageUtil.getMessage(Constants.VALID_KEY_SEARCHTORANGEERROR, new String[] { "期間（from）" })));
+				return;
+			} else if (form.getFromDate().after(form.getToDate())) {
+				result.addError(new FieldError(result.getObjectName(), "searchPeriodFrom",
+						messageUtil.getMessage(Constants.VALID_KEY_SEARCHPERIODCOMPAREERROR, new String[] { "期間（from）", "期間（to）" })));
+				return;
+			} else if(dateUtil.differenceDays(form.getFromDate(), form.getToDate()) > 30) {
+				result.addError(new FieldError(result.getObjectName(), "searchPeriodFrom",
+						messageUtil.getMessage(Constants.VALID_KEY_SEARCHSETTINGOVER, new String[] {"検索期間", "30日"})));
 			}
+		}
+	}
+
+	public void getUserAttendance(BulkRegistForm bulkRegistForm) {
+		List<UserAttendanceDto> attendanceList = new ArrayList<>();
+		attendanceList = mPlaceMapper.getUserAttendanceDto(loginUserDto.getPlaceId(), bulkRegistForm.getFromDate(),
+				bulkRegistForm.getToDate(), Constants.DB_FLG_FALSE);
+		List<DailyAttendanceForm> dailyAttendanceList = new ArrayList<>();
+		Integer i = 0;
+		for (UserAttendanceDto attendance : attendanceList) {
+			DailyAttendanceForm daForm = new DailyAttendanceForm();
+			if (attendance.getTrainingStartTime() == null || attendance.getTrainingStartTime().isBlank()) {
+				daForm.setTrainingStartTime("未入力");
+
+			} else {
+				daForm.setTrainingStartTime(attendance.getTrainingStartTime());
+				daForm.setHourOfTrainingStartTime(
+						attendanceUtil.getHourAndMinOfTrainingTime("h", attendance.getTrainingStartTime()));
+				daForm.setMinuteOfTrainingStartTime(
+						attendanceUtil.getHourAndMinOfTrainingTime("m", attendance.getTrainingStartTime()));
+			}
+			if (attendance.getTrainingEndTime() == null || attendance.getTrainingEndTime().isBlank()) {
+				daForm.setTrainingEndTime("未入力");
+
+			} else {
+				daForm.setTrainingEndTime(attendance.getTrainingEndTime());
+				daForm.setHourOfTrainingStartTime(
+						attendanceUtil.getHourAndMinOfTrainingTime("h", attendance.getTrainingStartTime()));
+				daForm.setMinuteOfTrainingStartTime(
+						attendanceUtil.getHourAndMinOfTrainingTime("m", attendance.getTrainingStartTime()));
+			}
+			TrainingTime trainingStartTime = new TrainingTime(daForm.getHourOfTrainingStartTime(),
+					daForm.getMinuteOfTrainingStartTime());
+			TrainingTime trainingEndTime = new TrainingTime(daForm.getHourOfTrainingEndTime(),
+					daForm.getMinuteOfTrainingEndTime());
+			trainingStartTime.roundUp();
+			trainingEndTime.roundDown();
+			if (trainingStartTime.compareTo(Constants.SSS_REST_START_TIME) == -1) {
+				daForm.setHourOfTrainingStartTime(Constants.SSS_REST_START_TIME.getHour());
+				daForm.setMinuteOfTrainingStartTime(Constants.SSS_REST_START_TIME.getMinute());
+			} else {
+				daForm.setMinuteOfTrainingStartTime(trainingStartTime.getMinute());
+			}
+			if (trainingEndTime.compareTo(Constants.SSS_WORK_END_TIME) == 1) {
+				daForm.setHourOfTrainingEndTime(Constants.SSS_REST_END_TIME.getHour());
+				daForm.setMinuteOfTrainingEndTime(Constants.SSS_REST_END_TIME.getMinute());
+			} else {
+				daForm.setMinuteOfTrainingStartTime(trainingStartTime.getMinute());
+			}
+			TrainingTime blankTime = new TrainingTime();
+			blankTime = attendanceUtil.calcBlankTime(attendance.getBlankTime());
+			daForm.setBlankTimeValue(blankTime.getFormattedString());
+			AttendanceStatusEnum statusEnum = AttendanceStatusEnum.getEnum(attendance.getStatus());
+			if (statusEnum != null) {
+				daForm.setStatusDispName(statusEnum.name);
+			}
+			daForm.setIndex(i.toString());
+			dailyAttendanceList.add(i, daForm);
+			i++;
 		}
 	}
 }

@@ -2,21 +2,64 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="jp.co.sss.lms.mapper.MPlaceMapper">
+<resultMap type="jp.co.sss.lms.dto.PlaceDto" id="placeDto">
+		<id column="place_id" property="placeId" />
+		<result column="place_name" property="placeName" />
+		<result column="place_discription" property="placeDiscription" />
+		<result column="support_available" property="supportAvailable" />
+		<result column="seating_capacity" property="seatingCapacity" />
+		<result column="place_note" property="placeNote" />
+		<result column="hidden_flg" property="hiddenFlg" />
+</resultMap>
 
-	<select id="getPlaceInfoById" resultType="jp.co.sss.lms.dto.PlaceDto">
-	SELECT t3.place_id AS placeId,
-		   t3.place_name AS placeName,
-		   t3.place_discription AS placeDiscription,
-		   t3.support_available AS supportAvailable,
-		   t3.seating_capacity AS seatingCapacity,
-		   t3.place_note AS placeNote,
-		   t3.hidden_flg AS hiddenFlg
-	FROM m_lms_user t
-	LEFT OUTER JOIN t_user_place t2 
-	ON t.lms_user_id = t2.lms_user_id AND t.delete_flg = #{deleteFlg}
-	LEFT OUTER JOIN m_place t3 ON t2.place_id = t3.place_id
-	WHERE t.lms_user_id = #{lmsUserId}
-	AND t3.hidden_flg = #{hiddenFlg;
+	<select id="getPlaceInfoById" resultMap="placeDto">
+	SELECT *
+	FROM m_place
+	WHERE place_id = #{placeId}
+	AND hidden_flg = #{hiddenFlg}
+	AND delete_flg = #{deleteFlg};
+	</select>
+	
+	<select id="getUserAttendanceDto">
+	SELECT
+		t1.place_id AS placeId,
+		t3.lms_user_id AS lmsUserId,
+		t4.user_name AS userName,
+		t6.course_name AS courseName,
+		t9.company_attendance_id AS companyAttendanceId,
+		t8.student_attendance_id AS studentAttendanceId,
+		t7.training_date AS trainingDate,
+		t9.training_start_time AS trainingStartTime,
+		t9.training_end_time AS trainingEndTime,
+		t9.status AS status,
+		t9.note AS note
+	FROM m_place t1
+	INNER JOIN t_user_place t2 ON t1.place_id = t2.place_id 
+	AND t2.delete_flg = #{deleteFlg}
+	INNER JOIN m_lms_user t3 ON t2.lms_user_id = t3.lms_user_id 
+	ANDt3.delete_flg = #{deleteFlg}
+	INNER JOIN m_user t4 ON t3.lms_user_id = t4.lms_user_id
+	AND t4.delete_flg = #{deleteFlg}
+	INNER JOIN t_course_user t5 ON t3.lms_user_id = t5.lms_user_id
+	AND t5.delete_flg = #{deleteFlg}
+	INNER JOIN m_course t6 ON t5.course_id = t6.course_id
+	AND t6.delete_flg = #{delete_flg}
+	INNER JOIN m_section t7 ON t6.course_id = t7.course_id
+	AND t7.delete_flg = #{deleteFlg}
+	LEFT OUTER JOIN t_student_attendance t8 ON t3.lms_user_id = t8.lms_user_id
+	AND t8.delete_flg = #{deleteFlg}
+	LEFT OUTER JOIN t_company_attendance t9 ON t3.lms_user_id = t9.lms_user_id
+	AND t9.delete_flg = #{deleteFlg}
+	WHERE t9.training_date IS NULL
+	OR (t9.training_date IS NOT NULL 
+	AND ((t9.training_start_time = ""
+	AND t9.training_end_time = ""
+	AND t9.status <![CDATA[ <> ]]> 1)))
+	AND t4.authority = '0001'
+	AND t1.place_id = #{placeId}
+	AND t1.delete_flg = #{deleteFlg}
+	ORDER BY t7.training_date ASC
+	AND t3.lms_user_id ASC;
 	</select>
 
 </mapper>

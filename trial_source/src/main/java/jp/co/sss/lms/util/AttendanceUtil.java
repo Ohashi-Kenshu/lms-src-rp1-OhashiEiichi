@@ -78,8 +78,6 @@ public class AttendanceUtil {
 	 *
 	 * @param min 中抜け時間
 	 * @return 時(hour)と分(minute)に変換したクラス
-	 * 分数で計上された中抜け時間を〇時間〇分に変換している？
-	 * 60分で割れる数と余り
 	 */
 	public TrainingTime calcBlankTime(int min) {
 		int hour = min / 60;
