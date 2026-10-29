@@ -379,9 +379,8 @@ public class StudentAttendanceService {
 		//形式に合わせて丸める
 		String today = sdf.format(now);
 		now = sdf.parse(today);
-		short deleteFlg = 0;
 		//過去日の未入力件数を取得
-		Integer emptyCount = tStudentAttendanceMapper.notEnterCount(loginUserDto.getLmsUserId(), deleteFlg, now);
+		Integer emptyCount = tStudentAttendanceMapper.notEnterCount(loginUserDto.getLmsUserId(), Constants.DB_FLG_FALSE, now);
 		//未入力があれば真、なければ偽を返す
 		return emptyCount > 0;
 	}
@@ -394,11 +393,13 @@ public class StudentAttendanceService {
 		for (DailyAttendanceForm da : attendanceForm.getAttendanceList()) {
 			if (da.getHourOfTrainingStartTime() != null && da.getMinuteOfTrainingStartTime() != null) {
 				da.setTrainingStartTime(
-						String.format("%02d:%02d", da.getHourOfTrainingStartTime(), da.getMinuteOfTrainingStartTime()));
+						String.format("%02d:%02d", da.getHourOfTrainingStartTime(), da.getMinuteOfTrainingStartTime())
+						);
 			}
 			if (da.getHourOfTrainingEndTime() != null && da.getMinuteOfTrainingEndTime() != null) {
 				da.setTrainingEndTime(
-						String.format("%02d:%02d", da.getHourOfTrainingEndTime(), da.getMinuteOfTrainingEndTime()));
+						String.format("%02d:%02d", da.getHourOfTrainingEndTime(), da.getMinuteOfTrainingEndTime())
+						);
 			}
 		}
 
@@ -407,7 +408,7 @@ public class StudentAttendanceService {
 	/**
 	 *task27 勤怠管理直接変更の入力チェック 
 	 */
-	public void updateInputCheck(AttendanceForm attendanceForm, BindingResult result) throws ParseException {
+	public void updateInputCheck(AttendanceForm attendanceForm, BindingResult result) {
 		int i = 0;
 		for (DailyAttendanceForm da : attendanceForm.getAttendanceList()) {
 			if (da.getNote().length() > 100) {
@@ -496,7 +497,7 @@ public class StudentAttendanceService {
 	public void setBulkRegistForm(BulkRegistForm bulkRegistForm) {
 		PlaceDto placeDto = new PlaceDto();
 		placeDto = placeService.getPlaceInfoById(loginUserDto.getLmsUserId());
-		if (placeDto.getPlaceName() != null || !placeDto.getPlaceName().isEmpty()) {
+		if (placeDto.getPlaceName() != null || !placeDto.getPlaceName().isBlank()) {
 			String placeNote = placeDto.getPlaceNote();
 			String separator = "$";
 			int firstSep = placeNote.indexOf(separator);
@@ -543,7 +544,7 @@ public class StudentAttendanceService {
 		attendanceList = mPlaceMapper.getUserAttendanceDto(loginUserDto.getPlaceId(), bulkRegistForm.getFromDate(),
 				bulkRegistForm.getToDate(), Constants.DB_FLG_FALSE);
 		List<DailyAttendanceForm> dailyAttendanceList = new ArrayList<>();
-		Integer i = 0;
+		int i = 0;
 		for (UserAttendanceDto attendance : attendanceList) {
 			DailyAttendanceForm daForm = new DailyAttendanceForm();
 			if (attendance.getTrainingStartTime() == null || attendance.getTrainingStartTime().isBlank()) {
@@ -590,10 +591,13 @@ public class StudentAttendanceService {
 			AttendanceStatusEnum statusEnum = AttendanceStatusEnum.getEnum(attendance.getStatus());
 			if (statusEnum != null) {
 				daForm.setStatusDispName(statusEnum.name);
-			}
-			daForm.setIndex(i.toString());
-			dailyAttendanceList.add(i, daForm);
+				}
+			String trainingDate = dateUtil.toString(attendance.getTrainingDate());
+			String index = trainingDate.substring(trainingDate.lastIndexOf("/") + 1);
+			daForm.setIndex(index);
+			dailyAttendanceList.set(i,daForm);
 			i++;
 		}
+		bulkRegistForm.setDailyAttendanceList(dailyAttendanceList);
 	}
 }

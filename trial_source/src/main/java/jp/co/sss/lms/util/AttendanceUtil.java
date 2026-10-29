@@ -152,23 +152,15 @@ public class AttendanceUtil {
 	 */
 	public LinkedHashMap<Integer, String> prepareHourAndMin(String hORm) {
 		LinkedHashMap<Integer, String> map = new LinkedHashMap<>();
-		map.put(null, null);
+		map.put(null, "");
 		if ("h".equals(hORm)) {
 			for (int i = 0; i < 24; i++) {
-				if ( i<10 ) {
-					map.put(i, "0" + i);
-				} else {
-					map.put(i, Integer.toString(i));
-				}
+				map.put(i, String.format("%02d", i));
 			}
 			return map;
 		} else if ("m".equals(hORm)) {
 			for (int i = 0; i < 60; i++) {
-				if ( i<10 ) {
-					map.put(i, "0" + i);
-				} else {
-					map.put(i, Integer.toString(i));
-				}
+				map.put(i, String.format("%02d", i));
 			}
 		}
 			return map;

@@ -181,7 +181,7 @@ public class AttendanceController {
 		List<StudentSearchResultDto> courseList = studentSearchService.getCourseList(studentSearchForm);
 		List<StudentSearchResultDto> companyList = studentSearchService.getCompanyList(studentSearchForm);
 		boolean hasNotEnter = false;
-		//resultList内の各lmsUserIdについて、過去日の勤怠未入力を判定　１件目の検知で中断、trueを返す
+		//resultList内の各lmsUserIdについて、過去日の勤怠未入力を判定　１件の検知で中断、trueを返す
 		for(StudentSearchResultDto result : resultList) {
 			if(studentAttendanceService.notEnterCheckForTeacher(result.getUserId())) {
 				hasNotEnter = true;
@@ -192,7 +192,7 @@ public class AttendanceController {
 		model.addAttribute("courseList", courseList);
 		model.addAttribute("companyList", companyList);
 		model.addAttribute("hasNotEnter", hasNotEnter);
-		return "attendance/searchStudent";
+		return "attendance/list";
 	}
 
 	/**
@@ -218,7 +218,7 @@ public class AttendanceController {
 		model.addAttribute("courseList", courseList);
 		model.addAttribute("companyList", companyList);
 		model.addAttribute("hasNotEnter", hasNotEnter);
-		return "attendance/searchStudent";
+		return "attendance/list";
 	}
 	@GetMapping("/bulkRegist")
 	public String getBulkList(@ModelAttribute BulkRegistForm bulkRegistForm) {
